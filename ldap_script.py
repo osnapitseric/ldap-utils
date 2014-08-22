@@ -1,55 +1,41 @@
-#!/usr/bin/python
 import ldif
 import os
 
 
 def get_user_data():
-    uidNumberFilePath = '/tmp/uidNumber '
-
-    #apass = raw_input('Enter LDAP auth password: ')
-    filename = raw_input('Enter filename: ')
-    givenName = raw_input('Enter first name: ')
-    sn = raw_input('Enter last name: ')
-    cn = raw_input('Enter username: ')
-    mail = raw_input('Enter email: ')
-    title = raw_input('Enter title: ')
-    userpass = raw_input('Enter user password: ')
-    uidNumber = os.popen("ldapsearch -x -LLL -H ldap://ldap-utility-e1a-001.caffeine.io -b dc=caffeine,dc=io 'uidNumber=*' -S uidNumber | awk '/uidNumber/ {print $2}' | tail -n1")
-
-    return {'first': givenName,
-            'last': sn,
-            'username': cn,
-            'email': mail,
-            'title': title,
-            'filename': filename,
-            'userpass': userpass,
-            'uidNumber': uidNumber}
+    return {'filename': raw_input('Filename: '),
+            'cn': raw_input('First name: '),
+            'sn': raw_input('Last name: '),
+            'mail': raw_input('Email: '),
+            'title': raw_input('Title: '),
+            'username': raw_input('Username: '),
+            'pw': raw_input('Password: '),
+            'uid': os.popen("ldapsearch -x -LLL -H ldap://ldap-utility-e1a-001.caffeine.io -b dc=caffeine,dc=io 'uidNumber=*' -S uidNumber | awk '/uidNumber/ {print $2}' | tail -n1").read().strip()+1}
 
 
 def main():
     data = get_user_data()
 
-    entry = {'objectClass': ['top',
-                             'person',
-                             'organizationalPerson',
-                             'inetOrgPerson',
-                             'posixAccount'],
-             'cn': [data['username']],
-             'givenName': [data['first']],
-             'uid': [data['username']],
-             'mail': [data['email']],
-             'title': [data['title']],
-             'gecos': [data['username']],
-             'homeDirectory': ['/home/' + data['username']],
-             'loginShell': ['/bin/bash'],
-             'userPassword': [data['userpass']],
-             'uidNumber': [data['uidNumber']]}
-
-    dn = 'cn=' + data['username'] + ',ou=chartboost' + ',dc=caffeine,dc=io'
     with open('/tmp/' + data['filename'] + '.ldif', 'w') as fd:
-        ldif_writer = ldif.LDIFWriter(fd)
-        ldif_writer.unparse(dn, entry)
+        lw = ldif.LDIFWriter(fd)
 
+        lw.unparse('cn=' + data['username'] + ',ou=chartboost,dc=caffeine,dc=io',
+                   {'objectClass': ['top',
+                                    'person',
+                                    'organizationalPerson',
+                                    'inetOrgPerson',
+                                    'posixAccount'],
+                    'cn': [data['username']],
+                    'givenname': [data['cn']],
+                    'uid': [data['uid']],
+                    'mail': [data['mail']],
+                    'title': [data['title']],
+                    'gecos': [data['username']],
+                    'homeDirectory': ['/home/' + data['username']],
+                    'loginShell': ['/bin/bash'],
+                    'userPassword': [data['pw']],
+                    'uidNumber': [data['uid']],
+                    'gidNumber': ['1001']})
 
 if __name__ == '__main__':
     main()
