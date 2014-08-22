@@ -14,7 +14,7 @@ def get_user_data():
     mail = raw_input('Enter email: ')
     title = raw_input('Enter title: ')
     userpass = raw_input('Enter user password: ')
-    uidNumber = os.popen("ldapsearch -x -LLL -H ldap://ldap-utility-e1a-001.caffeine.io -b dc=caffeine,dc=io 'uidNumber=*' -S uidNumber | awk '/uidNumber/ {print $2}' | tail -n1 >")
+    uidNumber = os.popen("ldapsearch -x -LLL -H ldap://ldap-utility-e1a-001.caffeine.io -b dc=caffeine,dc=io 'uidNumber=*' -S uidNumber | awk '/uidNumber/ {print $2}' | tail -n1")
 
     return {'first': givenName,
             'last': sn,
@@ -23,8 +23,7 @@ def get_user_data():
             'title': title,
             'filename': filename,
             'userpass': userpass,
-            'uidNumber': uidNumber,
-            'uidNumberFilePath': uidNumberFilePath}
+            'uidNumber': uidNumber}
 
 
 def main():
